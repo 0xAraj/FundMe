@@ -7,8 +7,8 @@ import {FundMeLibrary} from "./FundMeLibrary.sol";
 contract FundMe {
     using FundMeLibrary for uint;
     AggregatorV3Interface internal dataFeed;
-    uint256 constant MIN_AMOUNT = 5;
-    address immutable i_owner;
+    uint256 public constant MIN_AMOUNT = 5;
+    address public immutable i_owner;
     address[] public s_funders;
     mapping(address funders => uint amount) public s_addressToAmount;
 
@@ -22,7 +22,7 @@ contract FundMe {
         _;
     }
 
-    function transfer() public payable {
+    function transferFunds() public payable {
         require(
             msg.value.getPriceInUSD(dataFeed) >= MIN_AMOUNT,
             "Not enough amount!"
@@ -44,6 +44,6 @@ contract FundMe {
     }
 
     receive() external payable {
-        transfer();
+        transferFunds();
     }
 }

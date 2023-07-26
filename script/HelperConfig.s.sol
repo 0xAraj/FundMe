@@ -30,7 +30,7 @@ contract HelperConfig is Script {
         if (activeNetwork.networkAddress != address(0)) {
             return activeNetwork;
         }
-        MockV3Aggregator mockV3Aggregator = new MockV3Aggregator(8, 2e18);
+        MockV3Aggregator mockV3Aggregator = new MockV3Aggregator(8, 2000e18);
         NetworkConfig memory anvilConfig = NetworkConfig(
             address(mockV3Aggregator)
         );
