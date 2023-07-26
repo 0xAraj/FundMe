@@ -2,19 +2,19 @@
 
 pragma solidity 0.8.20;
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {FundMeLibrary} from "./FundMeLibrary.sol";
 
 contract FundMe {
+    using FundMeLibrary for uint;
     AggregatorV3Interface internal dataFeed;
     uint256 constant MIN_AMOUNT = 5;
     address immutable i_owner;
     address[] public s_funders;
     mapping(address funders => uint amount) public s_addressToAmount;
 
-    constructor() {
+    constructor(address priceFeed) {
         i_owner = payable(msg.sender);
-        dataFeed = AggregatorV3Interface(
-            0x694AA1769357215DE4FAC081bf1f309aDC325306
-        );
+        dataFeed = AggregatorV3Interface(priceFeed);
     }
 
     modifier onlyOwner() {
@@ -22,21 +22,11 @@ contract FundMe {
         _;
     }
 
-    function getLatestData() public view returns (uint) {
-        (, int priceInUSD, , , ) = dataFeed.latestRoundData();
-
-        return uint(priceInUSD * 1e10);
-    }
-
-    function getPriceInUSD(uint amount) public view returns (uint) {
-        uint ethPrice = getLatestData();
-        uint amountInUSD = (ethPrice * amount) / 1e36;
-
-        return amountInUSD;
-    }
-
     function transfer() public payable {
-        require(getPriceInUSD(msg.value) >= MIN_AMOUNT, "Not enough amount!");
+        require(
+            msg.value.getPriceInUSD(dataFeed) >= MIN_AMOUNT,
+            "Not enough amount!"
+        );
         s_funders.push(msg.sender);
         s_addressToAmount[msg.sender] = msg.value;
     }
@@ -47,9 +37,13 @@ contract FundMe {
     }
 
     function withdrawFunds() public onlyOwner {
-        (bool success, ) = payable(i_owner).call{value: address(this).balance}(
-            ""
-        );
+        (bool success, ) = payable(msg.sender).call{
+            value: address(this).balance
+        }("");
         require(success, "Transfer failed!");
+    }
+
+    receive() external payable {
+        transfer();
     }
 }
