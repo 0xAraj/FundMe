@@ -18,16 +18,16 @@ contract FundMeIntegrationTest is Test {
     }
 
     function testFundFundMe() public {
-        vm.startPrank(FUNDER);
         FundFundMe fundFundMe = new FundFundMe();
         fundFundMe.fundFundMe(address(fundMe));
 
-        console.log(address(this).balance);
+        console.log(address(fundMe).balance);
+        assert(address(fundMe).balance == 10000000000000000);
 
         WithdrawFundMe withdrawFundMe = new WithdrawFundMe();
         withdrawFundMe.withdrawFundMe(address(fundMe));
 
-        console.log(address(this).balance);
-        vm.stopPrank();
+        console.log(address(fundMe).balance);
+        assert(address(fundMe).balance == 0);
     }
 }

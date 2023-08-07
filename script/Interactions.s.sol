@@ -10,9 +10,11 @@ contract FundFundMe is Script {
     uint constant amount = 0.01 ether;
 
     function fundFundMe(address mostRecentDeployedContract) public {
+        vm.startBroadcast();
         FundMe(payable(mostRecentDeployedContract)).transferFunds{
             value: amount
         }();
+        vm.stopBroadcast();
     }
 
     function run() external {
@@ -26,7 +28,9 @@ contract FundFundMe is Script {
 
 contract WithdrawFundMe is Script {
     function withdrawFundMe(address mostRecentDeployedContract) public {
+        vm.startBroadcast();
         FundMe(payable(mostRecentDeployedContract)).withdrawFunds();
+        vm.stopBroadcast();
     }
 
     function run() external {
